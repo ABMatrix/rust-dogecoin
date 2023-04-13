@@ -383,14 +383,37 @@ impl std::error::Error for Bip34Error {
 
 #[cfg(test)]
 mod tests {
+    use bitcoin_hashes::{Hash, sha256};
     use crate::hashes::hex::FromHex;
 
     use crate::blockdata::block::{Block, BlockHeader};
+    use crate::{BlockHash, TxMerkleNode};
     use crate::consensus::encode::{deserialize, serialize};
     use crate::util::uint::Uint256;
     use crate::util::Error::{BlockBadTarget, BlockBadProofOfWork};
     use crate::network::constants::Network;
 
+    #[test]
+    fn get_script_hash() {
+        // let script_pk = Address::from_str(&).map_err(|e| anyhow!(e.to_string()))?.script_pubkey();
+        let mut script_hash = sha256::Hash::hash(&hex::decode("76a91467bc54d1f396bac9051ba8c0eca27fe955a5c3b588ac").unwrap()).into_inner();
+        script_hash.reverse();
+        println!("{:?}", hex::encode(&script_hash));
+    }
+
+    #[test]
+    fn test_genesis_header_hex() {
+        let header = BlockHeader {
+            version: 1,
+            prev_blockhash: BlockHash::all_zeros(),
+            merkle_root: TxMerkleNode::from_hex("5b2a3f53f605d62c53e62932dac6925e3d74afa5a4b459745c36d42d0ed26a69").unwrap(),
+            time: 1296688602,
+            bits: 0x207fffff,
+            nonce: 2
+        };
+        println!("ser hex: {:?}", hex::encode(serialize(&header)));
+    }
+    
     #[test]
     fn test_coinbase_and_bip34() {
         // testnet block 100,000
