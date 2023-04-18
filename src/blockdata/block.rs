@@ -392,11 +392,27 @@ mod tests {
     use crate::util::uint::Uint256;
     use crate::util::Error::{BlockBadTarget, BlockBadProofOfWork};
     use crate::network::constants::Network;
+    use std::str::FromStr;
+    use crate::blockdata::script;
+
+    #[test]
+    fn test_local_regtest_dogecoin_addr() {
+        let addr = crate::Address::from_str("n2ZvuPa3FR9aVrtr7tE98z9C6GiBTFhaY2").unwrap();
+        let script_pk = addr.script_pubkey();
+        let script = script::Script::from_str(&hex::encode(script_pk.as_bytes())).unwrap();
+        let re_addr = crate::Address::from_script(&script, Network::Regtest).unwrap();
+        assert_eq!(addr, re_addr);
+
+        let compress = hex::decode("038bdfff17d8305c82088a913637cb4bb495e13b7a434192e8d3b4f793ac6383fe").unwrap();
+        let pk = crate::PublicKey::from_slice(&compress).unwrap();
+        let add = crate::Address::p2pkh(&pk, Network::Regtest);
+        println!("{:?}", add);
+    }
 
     #[test]
     fn get_script_hash() {
-        // let script_pk = Address::from_str(&).map_err(|e| anyhow!(e.to_string()))?.script_pubkey();
-        let mut script_hash = sha256::Hash::hash(&hex::decode("76a91467bc54d1f396bac9051ba8c0eca27fe955a5c3b588ac").unwrap()).into_inner();
+        let addr = crate::Address::from_str("ngnMYaumYeRCxLT81GXVHS5FhfEYZfw53f").unwrap();
+        let mut script_hash = sha256::Hash::hash(&&addr.script_pubkey().as_bytes()).into_inner();
         script_hash.reverse();
         println!("{:?}", hex::encode(&script_hash));
     }

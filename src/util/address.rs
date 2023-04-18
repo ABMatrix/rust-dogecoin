@@ -34,7 +34,7 @@ use bech32;
 use crate::hashes::{sha256, Hash, HashEngine};
 use crate::hash_types::{PubkeyHash, ScriptHash};
 use crate::blockdata::{script, opcodes};
-use crate::blockdata::constants::{PUBKEY_ADDRESS_PREFIX_MAIN, SCRIPT_ADDRESS_PREFIX_MAIN, PUBKEY_ADDRESS_PREFIX_TEST, SCRIPT_ADDRESS_PREFIX_TEST, MAX_SCRIPT_ELEMENT_SIZE};
+use crate::blockdata::constants::{PUBKEY_ADDRESS_PREFIX_MAIN, SCRIPT_ADDRESS_PREFIX_MAIN, PUBKEY_ADDRESS_PREFIX_TEST, SCRIPT_ADDRESS_PREFIX_TEST, MAX_SCRIPT_ELEMENT_SIZE, PUBKEY_ADDRESS_PREFIX_REGTEST};
 use crate::network::constants::Network;
 use crate::util::base58;
 use crate::util::taproot::TapBranchHash;
@@ -858,7 +858,8 @@ impl fmt::Display for Address {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         let p2pkh_prefix = match self.network {
             Network::Bitcoin => PUBKEY_ADDRESS_PREFIX_MAIN,
-            Network::Testnet | Network::Signet | Network::Regtest => PUBKEY_ADDRESS_PREFIX_TEST,
+            Network::Testnet | Network::Signet => PUBKEY_ADDRESS_PREFIX_TEST,
+            Network::Regtest => PUBKEY_ADDRESS_PREFIX_REGTEST
         };
         let p2sh_prefix = match self.network {
             Network::Bitcoin => SCRIPT_ADDRESS_PREFIX_MAIN,
@@ -976,6 +977,10 @@ impl FromStr for Address {
             SCRIPT_ADDRESS_PREFIX_TEST => (
                 Network::Testnet,
                 Payload::ScriptHash(ScriptHash::from_slice(&data[1..]).unwrap()),
+            ),
+            PUBKEY_ADDRESS_PREFIX_REGTEST => (
+                Network::Regtest,
+                Payload::PubkeyHash(PubkeyHash::from_slice(&data[1..]).unwrap()),
             ),
             x => return Err(Error::Base58(base58::Error::InvalidAddressVersion(x))),
         };
